@@ -85,24 +85,58 @@ namespace Database_Projekt
 
         private void CreateTables()
         {
-            //NpgsqlCommand cmdCreateUsersTable =  dataSource.CreateCommand(@"
-            //    CREATE TABLE IF NOT EXISTS users (
-            //        user_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            //        username VARCHAR(255) NOT NULL UNIQUE,
-            //        password VARCHAR(255) NOT NULL
-            //    );");
+            NpgsqlCommand cmdCreateStocksTable = dataSource.CreateCommand(@"
+                CREATE TABLE IF NOT EXISTS stocks (
+                    stock_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL UNIQUE,
+                    price INT NOT NULL,
+                    amount INT NOT NULL,
+                    avaliable BOOL NOT NULL,
+                    purchase_history DATE NOT NULL
+                );");
 
-            //NpgsqlCommand cmdCreateLoginAttemptsTable = dataSource.CreateCommand(@"
-            //    CREATE TABLE IF NOT EXISTS login_attempts (
-            //        attempt_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            //        user_id INTEGER NOT NULL,
-            //        attempt_time TIMESTAMP NOT NULL,
-            //        success BOOLEAN NOT NULL,
-            //        FOREIGN KEY (user_id) REFERENCES users(user_id)
-            //    );");
+            NpgsqlCommand cmdCreatePortfolioTable = dataSource.CreateCommand(@"
+                CREATE TABLE IF NOT EXISTS portfoilio (
+                    port_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                    total_value INT NOT NULL
+                );");
 
-            //cmdCreateUsersTable.ExecuteNonQuery();
-            //cmdCreateLoginAttemptsTable.ExecuteNonQuery();
+            //TJEK GENERATED ALWAS AS IDENTITY
+            NpgsqlCommand cmdCreatePlayerTable = dataSource.CreateCommand(@"
+                CREATE TABLE IF NOT EXISTS player (
+                    char_name VARCHAR(255) ALWAYS AS IDENTITY PRIMARY KEY, 
+                    capital INT NOT NULL
+                );");
+
+            NpgsqlCommand cmdCreateAbilitiesTable = dataSource.CreateCommand(@"
+                CREATE TABLE IF NOT EXISTS abilities (
+                    ability_name VARCHAT(255) GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                    char_name VARCHAR(255) ALWAYS AS IDENTITY FOREIGN KEY,
+                    level INT NOT NULL,
+                    cost INT NOT NULL,
+                    unlocked BOOL NOT NULL
+                );");
+            NpgsqlCommand cmdCreateContainsTable = dataSource.CreateCommand(@"
+                CREATE TABLE IF NOT EXISTS contains (
+                    stock_id INT FROM stocks,
+                    port_id INT FROM portfolio,
+                    price_purchased_at INT NOT NULL,
+                    purchase_date INT NOT NULL
+                );");
+            NpgsqlCommand cmdCreatePortHasTable = dataSource.CreateCommand(@"
+                CREATE TABLE IF NOT EXISTS has (
+                    port_id INT FROM portfolio,
+                    char_name VARCHAR(255) FROM player
+                );");
+
+
+            //KALD CREATE TABLE
+            cmdCreateAbilitiesTable.ExecuteNonQuery();
+            cmdCreateContainsTable.ExecuteNonQuery();
+            cmdCreatePlayerTable.ExecuteNonQuery();
+            cmdCreatePortfolioTable.ExecuteNonQuery();
+            cmdCreatePortHasTable.ExecuteNonQuery();
+            cmdCreateStocksTable.ExecuteNonQuery();
         }
     }
 }
