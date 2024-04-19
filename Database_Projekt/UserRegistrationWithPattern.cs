@@ -6,7 +6,8 @@ namespace Database_Projekt
     public class UserRegistrationWithPattern
     {
         private readonly IRepository repository;
-
+        NpgsqlDataSource dataSource;
+        string connectionString = "Host=localhost;Username=postgres;Password=Saunire.124;Database=myDatabase";
 
         public UserRegistrationWithPattern(IRepository repository)
         {
@@ -15,7 +16,11 @@ namespace Database_Projekt
 
         public void RunLoop()
         {
+            dataSource = NpgsqlDataSource.Create(connectionString);
+
             CreateTables();
+
+            Insert();
 
             while (true)
             {
@@ -78,10 +83,6 @@ namespace Database_Projekt
 
         private void CreateTables()
         {
-            NpgsqlDataSource dataSource;
-            string connectionString = "Host=localhost;Username=postgres;Password=Saunire.124;Database=myDatabase";
-            dataSource = NpgsqlDataSource.Create(connectionString);
-
             NpgsqlCommand cmdCreateStocksTable = dataSource.CreateCommand(@"
                 CREATE TABLE IF NOT EXISTS stocks (
                     stock_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -89,7 +90,7 @@ namespace Database_Projekt
                     price INT NOT NULL,
                     amount INT NOT NULL,
                     avaliable BOOL NOT NULL,
-                    purchase_history DATE NOT NULL
+                    purchase_history DATE
                 );");
 
             NpgsqlCommand cmdCreatePortfolioTable = dataSource.CreateCommand(@"
@@ -137,8 +138,24 @@ namespace Database_Projekt
             cmdCreateHasTable.ExecuteNonQuery();
 
 
-
             Console.WriteLine("Tables created");
+
+        }
+
+        private void Insert()
+        {
+            NpgsqlCommand cmdInsertStocks = dataSource.CreateCommand(@"
+            INSERT INTO stocks (name, price, amount, avaliable) 
+            VALUES ('Mærsk', 1000, 100, true),
+                   ('Novo Nordisk', 500, 100, true),
+                   ('PostNord', 50, 300, true),   
+                   ('Google', 200, 1000, true),
+                   ('Tesla', 750, 0, false)
+            ");
+
+            cmdInsertStocks.ExecuteNonQuery();
+
+            Console.WriteLine("Stocks inserted");
             Console.ReadLine();
         }
     }
