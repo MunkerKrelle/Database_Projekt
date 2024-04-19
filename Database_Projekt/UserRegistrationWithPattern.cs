@@ -11,6 +11,8 @@ namespace Database_Projekt
         string connectionString = "Host=localhost;Username=postgres;Password=Saunire.124;Database=myDatabase";
         int amountToBuy;
         int amountToSell;
+        string wantToBuy;
+        string stockChosen;
 
         public UserRegistrationWithPattern(IRepository repository)
         {
@@ -24,6 +26,8 @@ namespace Database_Projekt
             CreateTables();
 
             Insert();
+
+            Update();
 
             while (true)
             {
@@ -152,24 +156,67 @@ namespace Database_Projekt
             NpgsqlCommand cmdInsertStocks = dataSource.CreateCommand(@"
             INSERT INTO stocks (name, price, amount, avaliable) 
             
-            VALUES ('Mærsk', 1000, 100, true),
+            VALUES('Mærsk', 1000, 100, true),
                    ('Novo Nordisk', 500, 100, true),
                    ('PostNord', 50, 300, true),   
                    ('Google', 200, 1000, true),
                    ('Tesla', 750, 0, false)
-
             ");
 
-            cmdInsertStocks.ExecuteNonQuery();
+            //cmdInsertStocks.ExecuteNonQuery();
 
             Console.WriteLine("Stocks inserted");
-            Console.ReadLine();
-
         }
 
         private void Update()
         {
+            Console.WriteLine("Do you want to buy or sell stocks?\nType BUY to buy or SELL to sell");
 
+            wantToBuy = Console.ReadLine();
+
+            if (wantToBuy == "buy")
+            {
+                Console.WriteLine("Which company would you like to purchase stocks from?");
+                stockChosen = Console.ReadLine();
+
+                Console.WriteLine("How many stocks would you like to buy?");
+                amountToBuy = int.Parse(Console.ReadLine());
+
+                NpgsqlCommand cmdBuyStocks = dataSource.CreateCommand($@"
+            UPDATE stocks
+            SET amount = amount - {amountToBuy}
+            WHERE name = '{stockChosen}'
+            ");
+
+                cmdBuyStocks.ExecuteNonQuery();
+
+                Console.WriteLine("Stocks bought");
+                Console.ReadLine();
+            }
+            else
+            {
+                if (wantToBuy == "sell")
+                {
+                    Console.WriteLine("Which company stocks would you like to sell?");
+                    stockChosen = Console.ReadLine();
+
+                    Console.WriteLine("How many stocks would you like to sell?");
+                    amountToSell = int.Parse(Console.ReadLine());
+
+                    NpgsqlCommand cmdSellStocks = dataSource.CreateCommand($@"
+            UPDATE stocks
+            SET amount = amount + {amountToSell}
+            WHERE name = '{stockChosen}'
+            ");
+
+                    cmdSellStocks.ExecuteNonQuery();
+
+                    Console.WriteLine("Stocks sold");
+                    Console.ReadLine();
+                }
+
+
+            }
         }
     }
 }
