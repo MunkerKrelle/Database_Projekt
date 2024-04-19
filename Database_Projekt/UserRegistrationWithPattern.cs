@@ -79,26 +79,67 @@ namespace Database_Projekt
         private void CreateTables()
         {
             NpgsqlDataSource dataSource;
-            string connectionString = "Host=localhost;Username=postgres;Password=100899;Database=postgres";
+            string connectionString = "Host=localhost;Username=postgres;Password=Saunire.124;Database=myDatabase";
             dataSource = NpgsqlDataSource.Create(connectionString);
-            NpgsqlCommand cmdCreateUsersTable = dataSource.CreateCommand(@"
-                CREATE TABLE IF NOT EXISTS BB_Players (
-                    username VARCHAR(255) NOT NULL UNIQUE PRIMARY KEY,
-                    monet INT NOT NULL DEFAULT(0)
-                
+
+            NpgsqlCommand cmdCreateStocksTable = dataSource.CreateCommand(@"
+                CREATE TABLE IF NOT EXISTS stocks (
+                    stock_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL UNIQUE,
+                    price INT NOT NULL,
+                    amount INT NOT NULL,
+                    avaliable BOOL NOT NULL,
+                    purchase_history DATE NOT NULL
                 );");
 
-            NpgsqlCommand cmdCreateLoginAttemptsTable = dataSource.CreateCommand(@"
-                CREATE TABLE IF NOT EXISTS BB_Stocks (
-                    attempt_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                    user_id INTEGER NOT NULL,
-                    attempt_time TIMESTAMP NOT NULL,
-                    success BOOLEAN NOT NULL,
-                    FOREIGN KEY (user_id) REFERENCES users(user_id)
+            NpgsqlCommand cmdCreatePortfolioTable = dataSource.CreateCommand(@"
+                CREATE TABLE IF NOT EXISTS portfolio (
+                    port_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                    total_value INT NOT NULL
                 );");
 
-            cmdCreateUsersTable.ExecuteNonQuery();
-            cmdCreateLoginAttemptsTable.ExecuteNonQuery();
+            NpgsqlCommand cmdCreatePlayerTable = dataSource.CreateCommand(@"
+                CREATE TABLE IF NOT EXISTS player (
+                    char_name VARCHAR(255) PRIMARY KEY,
+                    capital INT NOT NULL
+                );");
+
+            NpgsqlCommand cmdCreateAbilitiesTable = dataSource.CreateCommand(@"
+                CREATE TABLE IF NOT EXISTS abilities (
+                    ability_name VARCHAR(255) PRIMARY KEY,
+                    level INT NOT NULL,
+                    cost INT NOT NULL,
+                    unlocked BOOL NOT NULL,
+                    char_name VARCHAR(255) REFERENCES player(char_name)
+
+
+                );");
+            NpgsqlCommand cmdCreateContainsTable = dataSource.CreateCommand(@"
+                CREATE TABLE IF NOT EXISTS contains (
+                    stock_id INT REFERENCES stocks(stock_id),
+                    port_id INT REFERENCES portfolio(port_id),
+                    price_purchased_at INT NOT NULL,
+                    purchase_date INT NOT NULL
+                );");
+            NpgsqlCommand cmdCreateHasTable = dataSource.CreateCommand(@"
+                CREATE TABLE IF NOT EXISTS has (
+                    port_id INT REFERENCES portfolio(port_id),
+                    char_name VARCHAR(255) REFERENCES player(char_name)
+                );");
+
+
+            //KALD CREATE TABLE
+            cmdCreatePortfolioTable.ExecuteNonQuery();
+            cmdCreateStocksTable.ExecuteNonQuery();
+            cmdCreatePlayerTable.ExecuteNonQuery();
+            cmdCreateAbilitiesTable.ExecuteNonQuery();
+            cmdCreateContainsTable.ExecuteNonQuery();
+            cmdCreateHasTable.ExecuteNonQuery();
+
+
+
+            Console.WriteLine("Tables created");
+            Console.ReadLine();
         }
     }
 }
