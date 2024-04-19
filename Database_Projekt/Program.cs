@@ -6,7 +6,7 @@ namespace Database_Projekt
     {
         static void Main(string[] args)
         {
-            IRepository repository = new InMemoryRepository();
+            IRepository repository = new PostgresRepository();
             new UserRegistrationWithPattern(repository).RunLoop();
 
             Console.ReadLine();

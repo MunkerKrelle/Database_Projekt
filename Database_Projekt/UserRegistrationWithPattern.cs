@@ -7,6 +7,7 @@ namespace Database_Projekt
     {
         private readonly IRepository repository;
 
+
         public UserRegistrationWithPattern(IRepository repository)
         {
             this.repository = repository;
@@ -44,17 +45,13 @@ namespace Database_Projekt
             Console.WriteLine("Choose username:");
             string inputUsername = Console.ReadLine();
 
-            Console.WriteLine("Choose password:");
-            string inputPassword = Console.ReadLine();
-
             try
             {
                 repository.InsertUser(new User
                 {
-                    username = inputUsername,
-                    password = inputPassword
+                    username = inputUsername
                 });
-                Console.WriteLine("Successfully registered user");
+                Console.WriteLine($"Yo {inputUsername}, welcome to BIG BUCKS!");
             }
             catch (Exception)
             {
@@ -81,15 +78,18 @@ namespace Database_Projekt
 
         private void CreateTables()
         {
-            NpgsqlCommand cmdCreateUsersTable =  dataSource.CreateCommand(@"
-                CREATE TABLE IF NOT EXISTS users (
-                    user_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                    username VARCHAR(255) NOT NULL UNIQUE,
-                    password VARCHAR(255) NOT NULL
+            NpgsqlDataSource dataSource;
+            string connectionString = "Host=localhost;Username=postgres;Password=100899;Database=postgres";
+            dataSource = NpgsqlDataSource.Create(connectionString);
+            NpgsqlCommand cmdCreateUsersTable = dataSource.CreateCommand(@"
+                CREATE TABLE IF NOT EXISTS BB_Players (
+                    username VARCHAR(255) NOT NULL UNIQUE PRIMARY KEY,
+                    monet INT NOT NULL DEFAULT(0)
+                
                 );");
 
             NpgsqlCommand cmdCreateLoginAttemptsTable = dataSource.CreateCommand(@"
-                CREATE TABLE IF NOT EXISTS login_attempts (
+                CREATE TABLE IF NOT EXISTS BB_Stocks (
                     attempt_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                     user_id INTEGER NOT NULL,
                     attempt_time TIMESTAMP NOT NULL,
