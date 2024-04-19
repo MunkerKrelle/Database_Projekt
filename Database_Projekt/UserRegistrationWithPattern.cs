@@ -1,5 +1,6 @@
 ﻿using Npgsql;
 using System;
+using System.Collections.Generic;
 
 namespace Database_Projekt
 {
@@ -144,19 +145,24 @@ namespace Database_Projekt
 
         private void Insert()
         {
+            //BRUG EN READER TIL AT TJEKKE OM VÆRDIEN ALLEREDE FINDES
+
             NpgsqlCommand cmdInsertStocks = dataSource.CreateCommand(@"
             INSERT INTO stocks (name, price, amount, avaliable) 
+            
             VALUES ('Mærsk', 1000, 100, true),
                    ('Novo Nordisk', 500, 100, true),
                    ('PostNord', 50, 300, true),   
                    ('Google', 200, 1000, true),
                    ('Tesla', 750, 0, false)
+
             ");
 
             cmdInsertStocks.ExecuteNonQuery();
 
             Console.WriteLine("Stocks inserted");
             Console.ReadLine();
+
         }
     }
 }
