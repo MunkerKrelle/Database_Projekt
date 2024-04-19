@@ -9,6 +9,8 @@ namespace Database_Projekt
         private readonly IRepository repository;
         NpgsqlDataSource dataSource;
         string connectionString = "Host=localhost;Username=postgres;Password=Saunire.124;Database=myDatabase";
+        int amountToBuy;
+        int amountToSell;
 
         public UserRegistrationWithPattern(IRepository repository)
         {
@@ -162,6 +164,11 @@ namespace Database_Projekt
 
             Console.WriteLine("Stocks inserted");
             Console.ReadLine();
+
+        }
+
+        private void Update()
+        {
 
         }
     }
