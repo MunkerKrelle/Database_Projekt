@@ -202,43 +202,73 @@ namespace Database_Projekt
                     Console.WriteLine("Sorry, that many stocks aren't avaliable right now");
                 }
 
+                ForwardTime();
+
             }
+            else if (wantToBuy == "sell")
+            {
+                SellStocks();
+
+                ForwardTime();
+            }
+
             else
             {
-                if (wantToBuy == "sell")
-                {
-                    Console.WriteLine("Which company stocks would you like to sell?");
-                    stockChosen = Console.ReadLine();
-
-                    Console.WriteLine("How many stocks would you like to sell?");
-                    amountToSell = int.Parse(Console.ReadLine());
-
-                    NpgsqlCommand cmdSellStocks = dataSource.CreateCommand($@"
-            UPDATE stocks
-            SET amount = amount + {amountToSell}
-            WHERE name = '{stockChosen}'
-            ");
-
-                    cmdSellStocks.ExecuteNonQuery();
-
-                    Console.WriteLine("Stocks sold\n");
-
-                    Console.WriteLine("Press ENTER to forward to the next day");
-                    Console.ReadKey();
-
-                    Console.Clear();
-                    day++;
-                }
-
-
+                Update();
             }
+
 
 
         }
 
         private void ForwardTime()
         {
+            Console.WriteLine("Press ENTER to forward to the next day");
+            Console.ReadKey();
+
+            Console.Clear();
+            day++;
+        }
+
+        private void SellStocks()
+        {
+            if (wantToBuy == "sell")
+            {
+                Console.WriteLine("Which company stocks would you like to sell?");
+                stockChosen = Console.ReadLine();
+
+                NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT name FROM stocks WHERE (name = '{stockChosen}')");
+                NpgsqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if (stockChosen == reader.GetString(0))
+                    {
+                        Console.WriteLine("\nHow many stocks would you like to sell?\n");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Sorry, invalid company name. Please try again");
+                        SellStocks();
+                    }
+                }
+
+                reader.Close();
+
+                amountToSell = int.Parse(Console.ReadLine());
+
+                NpgsqlCommand cmdSellStocks = dataSource.CreateCommand($@"
+            UPDATE stocks
+            SET amount = amount + {amountToSell}
+            WHERE name = '{stockChosen}'
+            ");
+
+                cmdSellStocks.ExecuteNonQuery();
+
+                Console.WriteLine("Stocks sold\n");
+            }
 
         }
+
     }
 }
