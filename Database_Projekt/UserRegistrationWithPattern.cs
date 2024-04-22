@@ -11,6 +11,7 @@ namespace Database_Projekt
         string connectionString = "Host=localhost;Username=postgres;Password=Saunire.124;Database=myDatabase";
         int amountToBuy;
         int amountToSell;
+        int amountAvaliable;
         string wantToBuy;
         string stockChosen;
 
@@ -119,8 +120,6 @@ namespace Database_Projekt
                     cost INT NOT NULL,
                     unlocked BOOL NOT NULL,
                     char_name VARCHAR(255) REFERENCES player(char_name)
-
-
                 );");
             NpgsqlCommand cmdCreateContainsTable = dataSource.CreateCommand(@"
                 CREATE TABLE IF NOT EXISTS contains (
@@ -153,17 +152,15 @@ namespace Database_Projekt
         {
             //BRUG EN READER TIL AT TJEKKE OM VÆRDIEN ALLEREDE FINDES
 
-            NpgsqlCommand cmdInsertStocks = dataSource.CreateCommand(@"
+            NpgsqlCommand cmdInsertStocks = dataSource.CreateCommand($@"
             INSERT INTO stocks (name, price, amount, avaliable) 
             
             VALUES('Mærsk', 1000, 100, true),
                    ('Novo Nordisk', 500, 100, true),
-                   ('PostNord', 50, 300, true),   
-                   ('Google', 200, 1000, true),
-                   ('Tesla', 750, 0, false)
+                   ('PostNord', 50, 300, true)
             ");
 
-            //cmdInsertStocks.ExecuteNonQuery();
+            cmdInsertStocks.ExecuteNonQuery();
 
             Console.WriteLine("Stocks inserted");
         }
@@ -188,10 +185,18 @@ namespace Database_Projekt
             WHERE name = '{stockChosen}'
             ");
 
-                cmdBuyStocks.ExecuteNonQuery();
+                if (amountToBuy <= amountAvaliable)
+                {
+                    cmdBuyStocks.ExecuteNonQuery();
 
-                Console.WriteLine("Stocks bought");
-                Console.ReadLine();
+                    Console.WriteLine("Stocks bought");
+                    Console.ReadLine();
+                }
+                else if (amountToBuy > amountAvaliable)
+                {
+                    Console.WriteLine("Sorry, that many stocks aren't avaliable right now");
+                }
+
             }
             else
             {
