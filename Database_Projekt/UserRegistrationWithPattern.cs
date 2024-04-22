@@ -1,6 +1,7 @@
 ﻿using Npgsql;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Database_Projekt
 {
@@ -12,6 +13,8 @@ namespace Database_Projekt
         int amountToBuy;
         int amountToSell;
         int amountAvaliable;
+        int day = 1;
+        private int randomInt = 10;
         string wantToBuy;
         string stockChosen;
 
@@ -102,6 +105,16 @@ namespace Database_Projekt
                     purchase_history DATE
                 );");
 
+            NpgsqlCommand cmdUpdateStocksTable = dataSource.CreateCommand(@"
+                CREATE TABLE IF NOT EXISTS stocks (
+                    stock_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL UNIQUE,
+                    price INT NOT NULL,
+                    amount INT NOT NULL,
+                    avaliable BOOL NOT NULL,
+                    purchase_history DATE
+                );");
+
             NpgsqlCommand cmdCreatePortfolioTable = dataSource.CreateCommand(@"
                 CREATE TABLE IF NOT EXISTS portfolio (
                     port_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -139,6 +152,7 @@ namespace Database_Projekt
             //KALD CREATE TABLE
             cmdCreatePortfolioTable.ExecuteNonQuery();
             cmdCreateStocksTable.ExecuteNonQuery();
+            cmdUpdateStocksTable.ExecuteNonQuery();
             cmdCreatePlayerTable.ExecuteNonQuery();
             cmdCreateAbilitiesTable.ExecuteNonQuery();
             cmdCreateContainsTable.ExecuteNonQuery();
@@ -175,6 +189,8 @@ namespace Database_Projekt
 
         private void Update(string inputUsername)
         {
+            Console.WriteLine($"Day: {day}");
+
             Console.WriteLine("Do you want to buy or sell stocks?\nType BUY to buy or SELL to sell");
 
             wantToBuy = Console.ReadLine().ToLower();
@@ -206,22 +222,67 @@ namespace Database_Projekt
                     {
                         cmdBuyStocks.ExecuteNonQuery();
 
-                        Console.WriteLine("Stocks bought");
-                        Console.ReadLine();
-                    }
-                    else if (amountToBuy > amountAvaliable)
+                    Console.WriteLine("Stocks bought");
+                    Console.ReadLine();
+                }
+                else if (amountToBuy > amountAvaliable)
+                {
+                    Console.WriteLine("Sorry, that many stocks aren't avaliable right now");
+                }
+
+                ForwardTime();
+
+            }
+            else if (wantToBuy == "sell")
+            {
+                SellStocks();
+
+                ForwardTime();
+            }
+
+            else
+            {
+                Update();
+            }
+
+        }
+
+        private void ForwardTime()
+        {
+            UpdateStocks();
+            Console.WriteLine("Press ENTER to forward to the next day");
+            Console.ReadKey();
+            
+            Console.Clear();
+            day++;
+        }
+
+        private void SellStocks()
+        {
+            if (wantToBuy == "sell")
+            {
+                Console.WriteLine("Which company stocks would you like to sell?");
+                stockChosen = Console.ReadLine();
+
+                NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT name FROM stocks WHERE (name = '{stockChosen}')");
+                NpgsqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if (stockChosen == reader.GetString(0))
                     {
-                        Console.WriteLine("Sorry, that many stocks aren't avaliable right now");
+                        Console.WriteLine("\nHow many stocks would you like to sell?\n");
                     }
                     else
                     {
-                        if (wantToBuy == "sell")
-                        {
-                            Console.WriteLine("Which company stocks would you like to sell?");
-                            stockChosen = Console.ReadLine();
+                        Console.WriteLine("Sorry, invalid company name. Please try again");
+                        SellStocks();
+                    }
+                }
 
-                            Console.WriteLine("How many stocks would you like to sell?");
-                            amountToSell = int.Parse(Console.ReadLine());
+                reader.Close();
+
+                amountToSell = int.Parse(Console.ReadLine());
 
                             NpgsqlCommand cmdSellStocks = dataSource.CreateCommand($@"
             UPDATE stocks
@@ -231,13 +292,39 @@ namespace Database_Projekt
 
                             cmdSellStocks.ExecuteNonQuery();
 
-                            Console.WriteLine("Stocks sold");
-                            Console.ReadLine();
-                        }
-                    }
-                    reader.Close();
-                }
+                Console.WriteLine("Stocks sold\n");
+
+                Console.WriteLine("Press ENTER to forward to the next day");
+                Console.ReadKey();
+
+                Console.Clear();
+                day++;
+
             }
+
+            
+        }
+
+        private void MyRandom()
+        {
+            var rand = new Random();
+            randomInt = rand.Next(-50, 51);
+        }
+        private void UpdateStocks()
+        {
+            MyRandom();
+
+            NpgsqlCommand cmdUpdateStocksTable = dataSource.CreateCommand($@"
+        UPDATE stocks 
+        SET price = price + {randomInt}
+
+        ");
+
+            cmdUpdateStocksTable.ExecuteNonQuery();
+            //Console.WriteLine($"{bob}" );
+            Console.WriteLine("Stocks have been updated");
+            Console.ReadLine();
+
         }
     }
 }
