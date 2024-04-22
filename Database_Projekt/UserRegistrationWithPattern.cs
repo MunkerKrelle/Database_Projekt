@@ -231,15 +231,14 @@ namespace Database_Projekt
                 Update();
             }
 
-
-
         }
 
         private void ForwardTime()
         {
+            UpdateStocks();
             Console.WriteLine("Press ENTER to forward to the next day");
             Console.ReadKey();
-
+            
             Console.Clear();
             day++;
         }
@@ -279,30 +278,29 @@ namespace Database_Projekt
 
                 cmdSellStocks.ExecuteNonQuery();
 
-                    Console.WriteLine("Stocks sold\n");
+                Console.WriteLine("Stocks sold\n");
 
-                    Console.WriteLine("Press ENTER to forward to the next day");
-                    Console.ReadKey();
+                Console.WriteLine("Press ENTER to forward to the next day");
+                Console.ReadKey();
 
-                    Console.Clear();
-                    day++;
+                Console.Clear();
+                day++;
 
-                }
             }
 
-            UpdateStocks();
-    }
+            
+        }
 
-        private void MyRandom() 
+        private void MyRandom()
         {
             var rand = new Random();
             randomInt = rand.Next(-50, 51);
         }
-    private void UpdateStocks()
-    {
-        MyRandom();
+        private void UpdateStocks()
+        {
+            MyRandom();
 
-        NpgsqlCommand cmdUpdateStocksTable = dataSource.CreateCommand($@"
+            NpgsqlCommand cmdUpdateStocksTable = dataSource.CreateCommand($@"
         UPDATE stocks 
         SET price = price + {randomInt}
 
@@ -312,11 +310,6 @@ namespace Database_Projekt
             //Console.WriteLine($"{bob}" );
             Console.WriteLine("Stocks have been updated");
             Console.ReadLine();
-
-    }
-
-    private void ForwardTime()
-        {
 
         }
     }
