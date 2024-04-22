@@ -1,6 +1,7 @@
 ﻿using Npgsql;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Database_Projekt
 {
@@ -12,6 +13,7 @@ namespace Database_Projekt
         int amountToBuy;
         int amountToSell;
         int amountAvaliable;
+        int day = 1;
         string wantToBuy;
         string stockChosen;
 
@@ -28,28 +30,29 @@ namespace Database_Projekt
 
             Insert();
 
-            Update();
 
             while (true)
             {
-                Console.WriteLine("WELCOME TO BIG BUCKS\n" +
-                    ": 1) Create a new game, 2) Load an existing one");
-                string userInput = Console.ReadLine();
-                switch (userInput)
-                {
+                Update();
 
-                    case "1":
-                        CreateNewPlayer();
-                        break;
-                    case "2":
-                        LoadExistingPlayer();
-                        break;
-                    default:
-                        Console.WriteLine("Invalid input");
-                        break;
-                }
+                //Console.WriteLine("WELCOME TO BIG BUCKS\n" +
+                //    ": 1) Create a new game, 2) Load an existing one");
+                //string userInput = Console.ReadLine();
+                //switch (userInput)
+                //{
 
-                Console.WriteLine();
+                //    case "1":
+                //        CreateNewPlayer();
+                //        break;
+                //    case "2":
+                //        LoadExistingPlayer();
+                //        break;
+                //    default:
+                //        Console.WriteLine("Invalid input");
+                //        break;
+                //}
+
+                //Console.WriteLine();
             }
         }
 
@@ -160,13 +163,15 @@ namespace Database_Projekt
                    ('PostNord', 50, 300, true)
             ");
 
-            cmdInsertStocks.ExecuteNonQuery();
+            //cmdInsertStocks.ExecuteNonQuery();
 
             Console.WriteLine("Stocks inserted");
         }
 
         private void Update()
         {
+            Console.WriteLine($"Day: {day}");
+
             Console.WriteLine("Do you want to buy or sell stocks?\nType BUY to buy or SELL to sell");
 
             wantToBuy = Console.ReadLine();
@@ -216,12 +221,24 @@ namespace Database_Projekt
 
                     cmdSellStocks.ExecuteNonQuery();
 
-                    Console.WriteLine("Stocks sold");
-                    Console.ReadLine();
+                    Console.WriteLine("Stocks sold\n");
+
+                    Console.WriteLine("Press ENTER to forward to the next day");
+                    Console.ReadKey();
+
+                    Console.Clear();
+                    day++;
                 }
 
 
             }
+
+
+        }
+
+        private void ForwardTime()
+        {
+
         }
     }
 }
