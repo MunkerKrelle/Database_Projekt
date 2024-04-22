@@ -9,11 +9,12 @@ namespace Database_Projekt
     {
         private readonly IRepository repository;
         NpgsqlDataSource dataSource;
-        string connectionString = "Host=localhost;Username=postgres;Password=Saunire.124;Database=myDatabase";
+        string connectionString = "Host=localhost;Username=postgres;Password=sargon;Database=ovelse2";
         int amountToBuy;
         int amountToSell;
         int amountAvaliable;
         int day = 1;
+        private int randomInt = 10;
         string wantToBuy;
         string stockChosen;
 
@@ -104,6 +105,16 @@ namespace Database_Projekt
                     purchase_history DATE
                 );");
 
+            NpgsqlCommand cmdUpdateStocksTable = dataSource.CreateCommand(@"
+                CREATE TABLE IF NOT EXISTS stocks (
+                    stock_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL UNIQUE,
+                    price INT NOT NULL,
+                    amount INT NOT NULL,
+                    avaliable BOOL NOT NULL,
+                    purchase_history DATE
+                );");
+
             NpgsqlCommand cmdCreatePortfolioTable = dataSource.CreateCommand(@"
                 CREATE TABLE IF NOT EXISTS portfolio (
                     port_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -141,6 +152,7 @@ namespace Database_Projekt
             //KALD CREATE TABLE
             cmdCreatePortfolioTable.ExecuteNonQuery();
             cmdCreateStocksTable.ExecuteNonQuery();
+            cmdUpdateStocksTable.ExecuteNonQuery();
             cmdCreatePlayerTable.ExecuteNonQuery();
             cmdCreateAbilitiesTable.ExecuteNonQuery();
             cmdCreateContainsTable.ExecuteNonQuery();
@@ -160,7 +172,9 @@ namespace Database_Projekt
             
             VALUES('Mærsk', 1000, 100, true),
                    ('Novo Nordisk', 500, 100, true),
-                   ('PostNord', 50, 300, true)
+                   ('PostNord', 50, 300, true),
+                   ('bob', 35, 400, true)
+
             ");
 
             //cmdInsertStocks.ExecuteNonQuery();
@@ -228,15 +242,36 @@ namespace Database_Projekt
 
                     Console.Clear();
                     day++;
+
                 }
-
-
             }
 
+            UpdateStocks();
+    }
 
+        private void MyRandom() 
+        {
+            var rand = new Random();
+            randomInt = rand.Next(-50, 51);
         }
+    private void UpdateStocks()
+    {
+        MyRandom();
 
-        private void ForwardTime()
+        NpgsqlCommand cmdUpdateStocksTable = dataSource.CreateCommand($@"
+        UPDATE stocks 
+        SET price = price + {randomInt}
+
+        ");
+
+            cmdUpdateStocksTable.ExecuteNonQuery();
+            //Console.WriteLine($"{bob}" );
+            Console.WriteLine("Stocks have been updated");
+            Console.ReadLine();
+
+    }
+
+    private void ForwardTime()
         {
 
         }
