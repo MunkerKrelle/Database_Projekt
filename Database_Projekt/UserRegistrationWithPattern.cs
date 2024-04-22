@@ -214,7 +214,7 @@ namespace Database_Projekt
 
                 NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT char_name, capital FROM player WHERE (char_name = '{inputUsername}')");
                 NpgsqlDataReader reader = cmd.ExecuteReader();
-                
+
                 while (reader.Read())
                 {
                     int bucks = reader.GetInt16(1);
@@ -222,29 +222,26 @@ namespace Database_Projekt
                     {
                         cmdBuyStocks.ExecuteNonQuery();
 
-                    Console.WriteLine("Stocks bought");
-                    Console.ReadLine();
+                        Console.WriteLine("Stocks bought");
+                        Console.ReadLine();
+                    }
+                    else if (amountToBuy > amountAvaliable)
+                    {
+                        Console.WriteLine("Sorry, that many stocks aren't avaliable right now");
+                    }
+                    else if (wantToBuy == "sell")
+                    {
+                        SellStocks();
+
+                        ForwardTime();
+                    }
+                    else
+                    {
+                        Update(inputUsername);
+                    }
+
                 }
-                else if (amountToBuy > amountAvaliable)
-                {
-                    Console.WriteLine("Sorry, that many stocks aren't avaliable right now");
-                }
-
-                ForwardTime();
-
             }
-            else if (wantToBuy == "sell")
-            {
-                SellStocks();
-
-                ForwardTime();
-            }
-
-            else
-            {
-                Update();
-            }
-
         }
 
         private void ForwardTime()
@@ -252,7 +249,7 @@ namespace Database_Projekt
             UpdateStocks();
             Console.WriteLine("Press ENTER to forward to the next day");
             Console.ReadKey();
-            
+
             Console.Clear();
             day++;
         }
@@ -284,13 +281,13 @@ namespace Database_Projekt
 
                 amountToSell = int.Parse(Console.ReadLine());
 
-                            NpgsqlCommand cmdSellStocks = dataSource.CreateCommand($@"
+                NpgsqlCommand cmdSellStocks = dataSource.CreateCommand($@"
             UPDATE stocks
             SET amount = amount + {amountToSell}
             WHERE name = '{stockChosen}'
             ");
 
-                            cmdSellStocks.ExecuteNonQuery();
+                cmdSellStocks.ExecuteNonQuery();
 
                 Console.WriteLine("Stocks sold\n");
 
@@ -302,7 +299,7 @@ namespace Database_Projekt
 
             }
 
-            
+
         }
 
         private void MyRandom()
