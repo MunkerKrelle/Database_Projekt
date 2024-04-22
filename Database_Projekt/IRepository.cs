@@ -8,6 +8,7 @@ namespace Database_Projekt
     public class User
     {
         public string username { get; set; }
+        public int capital { get; set; }
     }
 
     public interface IRepository
@@ -63,7 +64,7 @@ namespace Database_Projekt
         public void InsertUser(User user)
         {
             NpgsqlCommand cmdInsert = dataSource.CreateCommand(
-                "INSERT INTO BB_Players (username) VALUES ($1)");
+                "INSERT INTO player (char_name) VALUES ($1)");
 
             cmdInsert.Parameters.AddWithValue(user.username);
 

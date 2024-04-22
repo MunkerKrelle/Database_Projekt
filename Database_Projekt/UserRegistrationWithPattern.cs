@@ -9,7 +9,7 @@ namespace Database_Projekt
     {
         private readonly IRepository repository;
         NpgsqlDataSource dataSource;
-        string connectionString = "Host=localhost;Username=postgres;Password=sargon;Database=ovelse2";
+        string connectionString = "Host=localhost;Username=postgres;Password=100899;Database=postgres";
         int amountToBuy;
         int amountToSell;
         int amountAvaliable;
@@ -31,49 +31,49 @@ namespace Database_Projekt
 
             Insert();
 
-
-            while (true)
+            Console.WriteLine("WELCOME TO BIG BUCKS:\n" +
+                "1) Create a new game, 2) Load an existing one");
+            string userInput = Console.ReadLine();
+            switch (userInput)
             {
-                Update();
-
-                //Console.WriteLine("WELCOME TO BIG BUCKS\n" +
-                //    ": 1) Create a new game, 2) Load an existing one");
-                //string userInput = Console.ReadLine();
-                //switch (userInput)
-                //{
-
-                //    case "1":
-                //        CreateNewPlayer();
-                //        break;
-                //    case "2":
-                //        LoadExistingPlayer();
-                //        break;
-                //    default:
-                //        Console.WriteLine("Invalid input");
-                //        break;
-                //}
-
-                //Console.WriteLine();
+                case "1":
+                    Update(CreateNewPlayer());
+                    break;
+                case "2":
+                    LoadExistingPlayer();
+                    break;
+                default:
+                    Console.WriteLine("Invalid input");
+                    break;
             }
+
         }
 
-        private void CreateNewPlayer()
+        private string CreateNewPlayer()
         {
             Console.WriteLine("Choose username:");
             string inputUsername = Console.ReadLine();
-
             try
             {
                 repository.InsertUser(new User
                 {
                     username = inputUsername
                 });
-                Console.WriteLine($"Yo {inputUsername}, welcome to BIG BUCKS!");
+
+                NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT char_name, capital FROM player WHERE (char_name = '{inputUsername}')");
+                NpgsqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    Console.WriteLine($"Yo {inputUsername}, welcome to BIG BUCKS!\nYou have {reader.GetInt16(1)} bucks");
+                }
+                reader.Close();
             }
             catch (Exception)
             {
                 Console.WriteLine("Unable to regiser, try a different username");
             }
+            return inputUsername;
         }
 
         private void LoadExistingPlayer()
@@ -124,7 +124,7 @@ namespace Database_Projekt
             NpgsqlCommand cmdCreatePlayerTable = dataSource.CreateCommand(@"
                 CREATE TABLE IF NOT EXISTS player (
                     char_name VARCHAR(255) PRIMARY KEY,
-                    capital INT NOT NULL
+                    capital INT DEFAULT 1000
                 );");
 
             NpgsqlCommand cmdCreateAbilitiesTable = dataSource.CreateCommand(@"
@@ -167,32 +167,40 @@ namespace Database_Projekt
         {
             //BRUG EN READER TIL AT TJEKKE OM VÆRDIEN ALLEREDE FINDES
 
-            NpgsqlCommand cmdInsertStocks = dataSource.CreateCommand($@"
+            try
+            {
+                NpgsqlCommand cmdInsertStocks = dataSource.CreateCommand($@"
             INSERT INTO stocks (name, price, amount, avaliable) 
             
             VALUES('Mærsk', 1000, 100, true),
                    ('Novo Nordisk', 500, 100, true),
-                   ('PostNord', 50, 300, true),
-                   ('bob', 35, 400, true)
-
+                   ('PostNord', 50, 300, true)
             ");
+            }
+            catch (Exception)
+            {
+
+            }
 
             //cmdInsertStocks.ExecuteNonQuery();
 
             Console.WriteLine("Stocks inserted");
         }
 
-        private void Update()
+        private void Update(string inputUsername)
         {
             Console.WriteLine($"Day: {day}");
 
             Console.WriteLine("Do you want to buy or sell stocks?\nType BUY to buy or SELL to sell");
 
-            wantToBuy = Console.ReadLine();
+            wantToBuy = Console.ReadLine().ToLower();
 
             if (wantToBuy == "buy")
             {
                 Console.WriteLine("Which company would you like to purchase stocks from?");
+                Console.WriteLine("Name: Mærsk, Price: 1000, Amount: 100\n" +
+                    "Name: Novo Nordisk, Price: 500, Amount: 100\n" +
+                    "Name: PostNord, Price: 50, Amount: 300");
                 stockChosen = Console.ReadLine();
 
                 Console.WriteLine("How many stocks would you like to buy?");
@@ -204,33 +212,36 @@ namespace Database_Projekt
             WHERE name = '{stockChosen}'
             ");
 
-                if (amountToBuy <= amountAvaliable)
+                NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT char_name, capital FROM player WHERE (char_name = '{inputUsername}')");
+                NpgsqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
                 {
-                    cmdBuyStocks.ExecuteNonQuery();
+                    int bucks = reader.GetInt16(1);
+                    if (amountToBuy <= amountAvaliable && bucks >= 50)
+                    {
+                        cmdBuyStocks.ExecuteNonQuery();
 
-                    Console.WriteLine("Stocks bought");
-                    Console.ReadLine();
+                        Console.WriteLine("Stocks bought");
+                        Console.ReadLine();
+                    }
+                    else if (amountToBuy > amountAvaliable)
+                    {
+                        Console.WriteLine("Sorry, that many stocks aren't avaliable right now");
+                    }
+                    else if (wantToBuy == "sell")
+                    {
+                        SellStocks();
+
+                        ForwardTime();
+                    }
+                    else
+                    {
+                        Update(inputUsername);
+                    }
+
                 }
-                else if (amountToBuy > amountAvaliable)
-                {
-                    Console.WriteLine("Sorry, that many stocks aren't avaliable right now");
-                }
-
-                ForwardTime();
-
             }
-            else if (wantToBuy == "sell")
-            {
-                SellStocks();
-
-                ForwardTime();
-            }
-
-            else
-            {
-                Update();
-            }
-
         }
 
         private void ForwardTime()
@@ -238,7 +249,7 @@ namespace Database_Projekt
             UpdateStocks();
             Console.WriteLine("Press ENTER to forward to the next day");
             Console.ReadKey();
-            
+
             Console.Clear();
             day++;
         }
@@ -288,7 +299,7 @@ namespace Database_Projekt
 
             }
 
-            
+
         }
 
         private void MyRandom()
