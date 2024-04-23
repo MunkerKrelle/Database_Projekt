@@ -198,14 +198,19 @@ namespace Database_Projekt
 
             if (wantToBuy == "buy")
             {
-                Console.WriteLine("Which company would you like to purchase stocks from?");
-                Console.WriteLine("Name: Mærsk, Price: 1000, Amount: 100\n" +
-                    "Name: Novo Nordisk, Price: 500, Amount: 100\n" +
-                    "Name: PostNord, Price: 50, Amount: 300");
-                stockChosen = Console.ReadLine();
+                NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT name, price, amount FROM stocks");
+                NpgsqlDataReader reader = cmd.ExecuteReader();
 
-                Console.WriteLine("How many stocks would you like to buy?");
-                amountToBuy = int.Parse(Console.ReadLine());
+                Console.WriteLine("Which company would you like to purchase stocks from?");
+                while (reader.Read())
+                {
+                    Console.WriteLine($"Name: {reader.GetValue(0)}, Price: {reader.GetValue(1)}, Amount: {reader.GetValue(2)}");
+                }
+                    stockChosen = Console.ReadLine();
+                    Console.WriteLine("How many stocks would you like to buy?");
+                    amountToBuy = int.Parse(Console.ReadLine());
+                
+                reader.Close();
 
                 NpgsqlCommand cmdBuyStocks = dataSource.CreateCommand($@"
             UPDATE stocks
@@ -213,8 +218,8 @@ namespace Database_Projekt
             WHERE name = '{stockChosen}'
             ");
 
-                NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT char_name, capital FROM player WHERE (char_name = '{inputUsername}')");
-                NpgsqlDataReader reader = cmd.ExecuteReader();
+                cmd = dataSource.CreateCommand($"SELECT char_name, capital FROM player WHERE (char_name = '{inputUsername}')");
+                reader = cmd.ExecuteReader();
 
                 while (reader.Read())
                 {
