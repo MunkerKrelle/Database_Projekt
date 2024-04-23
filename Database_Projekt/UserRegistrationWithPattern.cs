@@ -85,13 +85,17 @@ namespace Database_Projekt
             if (foundUser == null)
             {
                 Console.WriteLine("Invalid credentials");
-                return;
+                RunLoop();
             }
             else
             {
                 Console.WriteLine($"Yo {inputUsername}, welcome back to BIG BUCKS");
+                Update(inputUsername);
             }
         }
+
+
+
 
         private void CreateTables()
         {
@@ -176,13 +180,13 @@ namespace Database_Projekt
                    ('Novo Nordisk', 500, 100, true),
                    ('PostNord', 50, 300, true)
             ");
+
+                cmdInsertStocks.ExecuteNonQuery();
             }
             catch (Exception)
             {
 
             }
-
-            //cmdInsertStocks.ExecuteNonQuery();
 
             Console.WriteLine("Stocks inserted");
         }
