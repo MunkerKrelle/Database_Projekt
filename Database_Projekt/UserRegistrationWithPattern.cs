@@ -26,6 +26,7 @@ namespace Database_Projekt
         {
             dataSource = NpgsqlDataSource.Create(connectionString);
 
+
             CreateTables();
 
             Insert();
@@ -107,7 +108,10 @@ namespace Database_Projekt
             NpgsqlCommand cmdCreatePortfolioTable = dataSource.CreateCommand(@"
                 CREATE TABLE IF NOT EXISTS portfolio (
                     port_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                    total_value INT NOT NULL
+                    name VARCHAR (255) UNIQUE,
+                    price_purchased_at INT,
+                    amount INT,
+                    total_value INT
                 );");
 
             NpgsqlCommand cmdCreatePlayerTable = dataSource.CreateCommand(@"
@@ -163,7 +167,7 @@ namespace Database_Projekt
                    ('PostNord', 50, 300, true)
             ");
 
-            //cmdInsertStocks.ExecuteNonQuery();
+            cmdInsertStocks.ExecuteNonQuery();
 
             Console.WriteLine("Stocks inserted");
         }
@@ -190,25 +194,20 @@ namespace Database_Projekt
             WHERE name = '{stockChosen}'
             ");
 
-                if (amountToBuy <= amountAvaliable)
-                {
-                    cmdBuyStocks.ExecuteNonQuery();
+                cmdBuyStocks.ExecuteNonQuery();
 
-                    Console.WriteLine("Stocks bought");
-                    Console.ReadLine();
-                }
-                else if (amountToBuy > amountAvaliable)
-                {
-                    Console.WriteLine("Sorry, that many stocks aren't avaliable right now");
-                }
+                Console.WriteLine("Stocks bought");
+                Console.ReadLine();
 
+
+                BuyToPortfolio();
                 ForwardTime();
 
             }
             else if (wantToBuy == "sell")
             {
                 SellStocks();
-
+                SellFromPortfolio();
                 ForwardTime();
             }
 
@@ -268,6 +267,48 @@ namespace Database_Projekt
                 Console.WriteLine("Stocks sold\n");
             }
 
+        }
+
+        private void BuyToPortfolio()
+        {
+            //IF ROW DOES NOT EXIST
+            NpgsqlCommand cmdInsertIntoPortfolioAfterBuy = dataSource.CreateCommand($@"
+            INSERT INTO portfolio (name, price_purchased_at, amount) 
+            
+            VALUES('{stockChosen}', 1000, {amountToBuy})
+            ");
+
+            cmdInsertIntoPortfolioAfterBuy.ExecuteNonQuery();
+
+            //IF ROW ALREADY EXISTS
+            NpgsqlCommand cmdUpdatePortfolioAfterBuy = dataSource.CreateCommand($@"
+            UPDATE portfolio
+            SET amount = amount + {amountToBuy}
+            WHERE name = '{stockChosen}'
+            ");
+        }
+
+        private void SellFromPortfolio()
+        {
+            //INDSÆT EGENTLIG VÆRDI PÅ PRICE_PURCHASED_AT
+
+            NpgsqlCommand cmdUpdatePortfolioAfterSale = dataSource.CreateCommand($@"
+            UPDATE portfolio
+            SET amount = amount - {amountToBuy}
+            WHERE name = '{stockChosen}'
+            ");
+
+            //if (amountToSell >= amountAvaliable)
+            //{
+            //    NpgsqlCommand cmdDeleteFromTable = dataSource.CreateCommand($@"
+            //    DELETE FROM portfolio
+            //    WHERE name = '{stockChosen}'
+            //    ");
+
+            //    cmdDeleteFromTable.ExecuteNonQuery();
+            //}
+
+            cmdUpdatePortfolioAfterSale.ExecuteNonQuery();
         }
 
     }
