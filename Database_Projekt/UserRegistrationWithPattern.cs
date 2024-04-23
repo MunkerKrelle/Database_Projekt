@@ -9,7 +9,7 @@ namespace Database_Projekt
     {
         private readonly IRepository repository;
         NpgsqlDataSource dataSource;
-        string connectionString = "Host=localhost;Username=postgres;Password=100899;Database=postgres";
+        string connectionString = "Host=localhost;Username=postgres;Password=sargon;Database=ovelse2";
         int amountToBuy;
         int amountToSell;
         int amountCost;
@@ -92,6 +92,7 @@ namespace Database_Projekt
             else
             {
                 Console.WriteLine($"Yo {inputUsername}, welcome back to BIG BUCKS");
+                Update(inputUsername);
             }
         }
 
@@ -192,6 +193,7 @@ namespace Database_Projekt
                 BuyStocks();
                 BuyToPortfolio();
                 ForwardTime();
+                Update(inputUsername);
             }
 
             else if (wantToBuy == "sell")
@@ -199,6 +201,7 @@ namespace Database_Projekt
                 SellStocks();
                 SellFromPortfolio();
                 ForwardTime();
+                Update(inputUsername);
             }
             else
             {
