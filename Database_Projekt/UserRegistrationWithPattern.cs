@@ -28,6 +28,8 @@ namespace Database_Projekt
         {
             dataSource = NpgsqlDataSource.Create(connectionString);
 
+            DropTables();
+
             CreateTables();
 
             Insert();
@@ -251,7 +253,6 @@ namespace Database_Projekt
             cmdSellStocks.ExecuteNonQuery();
 
             Console.WriteLine("Stocks sold\n");
-
         }
 
 
@@ -354,6 +355,28 @@ namespace Database_Projekt
             //Console.WriteLine($"{bob}" );
             Console.WriteLine("Stocks have been updated");
             Console.ReadLine();
+        }
+
+        private void DropTables()
+        {
+            try
+            {
+                NpgsqlCommand cmdDropTables = dataSource.CreateCommand(@"
+            DROP TABLE has;
+            DROP TABLE contains;
+            DROP TABLE stocks;
+            DROP TABLE abilities;
+            DROP TABLE player;
+            DROP TABLE portfolio;
+            ");
+
+                cmdDropTables.ExecuteNonQuery();
+            }
+
+            catch (Exception)
+            {
+            }
+
         }
     }
 }
