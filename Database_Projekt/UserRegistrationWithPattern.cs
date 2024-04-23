@@ -343,7 +343,7 @@ namespace Database_Projekt
             ");
             }
 
-            cmd = dataSource.CreateCommand($"SELECT * FROM portfolio WHERE (player_name = '{inputUsername}')");
+            cmd = dataSource.CreateCommand($"SELECT * FROM portfolio WHERE (player_name = '{inputUsername}' AND stock_name = '{stockChosen}')");
             reader = cmd.ExecuteReader();
 
             while (reader.Read())
