@@ -107,19 +107,20 @@ namespace Database_Projekt
                     purchase_history DATE
                 );");
 
-            NpgsqlCommand cmdCreatePortfolioTable = dataSource.CreateCommand(@"
-                CREATE TABLE IF NOT EXISTS portfolio (
-                    port_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                    name VARCHAR (255) UNIQUE,
-                    price_purchased_at INT,
-                    amount INT,
-                    total_value INT
-                );");
-
             NpgsqlCommand cmdCreatePlayerTable = dataSource.CreateCommand(@"
                 CREATE TABLE IF NOT EXISTS player (
                     char_name VARCHAR(255) PRIMARY KEY,
                     capital INT DEFAULT 1000
+                );");
+
+            NpgsqlCommand cmdCreatePortfolioTable = dataSource.CreateCommand(@"
+                CREATE TABLE IF NOT EXISTS portfolio (
+                    port_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                    player_name VARCHAR(255) REFERENCES player(char_name),
+                    stock_name VARCHAR(255) REFERENCES stocks(name),
+                    amount INT,
+                    price_purchased_at INT,
+                    total_value INT
                 );");
 
             NpgsqlCommand cmdCreateAbilitiesTable = dataSource.CreateCommand(@"
@@ -145,9 +146,9 @@ namespace Database_Projekt
 
 
             //KALD CREATE TABLE
-            cmdCreatePortfolioTable.ExecuteNonQuery();
             cmdCreateStocksTable.ExecuteNonQuery();
             cmdCreatePlayerTable.ExecuteNonQuery();
+            cmdCreatePortfolioTable.ExecuteNonQuery();
             cmdCreateAbilitiesTable.ExecuteNonQuery();
             cmdCreateContainsTable.ExecuteNonQuery();
             cmdCreateHasTable.ExecuteNonQuery();
@@ -288,7 +289,7 @@ namespace Database_Projekt
                     cmdBuyStocks = dataSource.CreateCommand($@"
             UPDATE player
             SET capital =  capital - {amountCost}
-            WHERE name = '{inputUsername}'
+            WHERE char_name = '{inputUsername}'
             ");
                     cmdBuyStocks.ExecuteNonQuery();
 
@@ -308,9 +309,9 @@ namespace Database_Projekt
         {
             //IF ROW DOES NOT EXIST
             NpgsqlCommand cmdInsertIntoPortfolioAfterBuy = dataSource.CreateCommand($@"
-            INSERT INTO portfolio (name, price_purchased_at, amount) 
+            INSERT INTO portfolio (stock_name, amount, price_purchased_at) 
             
-            VALUES('{stockChosen}', 1000, {amountToBuy})
+            VALUES('{stockChosen}', '{amountToBuy}', '{amountCost}')
             ");
 
             cmdInsertIntoPortfolioAfterBuy.ExecuteNonQuery();
