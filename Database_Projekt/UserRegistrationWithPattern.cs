@@ -29,9 +29,7 @@ namespace Database_Projekt
             dataSource = NpgsqlDataSource.Create(connectionString);
 
             DropTables();
-
             CreateTables();
-
             Insert();
 
             Console.WriteLine("WELCOME TO BIG BUCKS:\n" +
@@ -356,7 +354,6 @@ namespace Database_Projekt
             Console.WriteLine("Stocks have been updated");
             Console.ReadLine();
         }
-
         private void DropTables()
         {
             try
@@ -376,7 +373,6 @@ namespace Database_Projekt
             catch (Exception)
             {
             }
-
         }
     }
 }
