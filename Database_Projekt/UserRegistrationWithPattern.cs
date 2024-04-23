@@ -28,8 +28,6 @@ namespace Database_Projekt
         {
             dataSource = NpgsqlDataSource.Create(connectionString);
 
-            DropTables();
-
             CreateTables();
 
             Insert();
@@ -62,7 +60,7 @@ namespace Database_Projekt
                 {
                     username = inputUsername,
                     capital = 1000
-                }); 
+                });
 
                 NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT char_name, capital FROM player WHERE (char_name = '{inputUsername}')");
                 NpgsqlDataReader reader = cmd.ExecuteReader();
@@ -254,6 +252,7 @@ namespace Database_Projekt
             cmdSellStocks.ExecuteNonQuery();
 
             Console.WriteLine("Stocks sold\n");
+
         }
 
 
@@ -276,9 +275,9 @@ namespace Database_Projekt
 
             while (reader.Read())
             {
-                amountCost
                 if (amountToBuy <= (int)reader.GetValue(5) && (int)reader.GetValue(1) >= (int)reader.GetValue(4) * amountToBuy)
                 {
+                    amountCost = (int)reader.GetValue(4) * amountToBuy;
                     NpgsqlCommand cmdBuyStocks = dataSource.CreateCommand($@"
             UPDATE stocks
             SET amount = amount - {amountToBuy}
@@ -288,7 +287,7 @@ namespace Database_Projekt
 
                     cmdBuyStocks = dataSource.CreateCommand($@"
             UPDATE player
-            SET capital =  capital - {amountToBuy}
+            SET capital =  capital - {amountCost}
             WHERE name = '{inputUsername}'
             ");
                     cmdBuyStocks.ExecuteNonQuery();
@@ -366,28 +365,6 @@ namespace Database_Projekt
             //Console.WriteLine($"{bob}" );
             Console.WriteLine("Stocks have been updated");
             Console.ReadLine();
-        }
-
-        private void DropTables()
-        {
-            try
-            {
-                NpgsqlCommand cmdDropTables = dataSource.CreateCommand(@"
-            DROP TABLE has;
-            DROP TABLE contains;
-            DROP TABLE stocks;
-            DROP TABLE abilities;
-            DROP TABLE player;
-            DROP TABLE portfolio;
-            ");
-
-                cmdDropTables.ExecuteNonQuery();
-            }
-
-            catch (Exception)
-            {
-            }
-
         }
     }
 }
