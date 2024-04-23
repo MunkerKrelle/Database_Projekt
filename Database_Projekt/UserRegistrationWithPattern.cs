@@ -9,7 +9,7 @@ namespace Database_Projekt
     {
         private readonly IRepository repository;
         NpgsqlDataSource dataSource;
-        string connectionString = "Host=localhost;Username=postgres;Password=100899;Database=postgres";
+        string connectionString = "Host=localhost;Username=postgres;Password=sargon;Database=ovelse2";
         int amountToBuy;
         int amountToSell;
         int amountCost;
@@ -28,8 +28,8 @@ namespace Database_Projekt
         {
             dataSource = NpgsqlDataSource.Create(connectionString);
 
+            DropTables();
             CreateTables();
-
             Insert();
 
             Console.WriteLine("WELCOME TO BIG BUCKS:\n" +
@@ -92,6 +92,7 @@ namespace Database_Projekt
             else
             {
                 Console.WriteLine($"Yo {inputUsername}, welcome back to BIG BUCKS");
+                Update(inputUsername);
             }
         }
 
@@ -192,6 +193,7 @@ namespace Database_Projekt
                 BuyStocks();
                 BuyToPortfolio();
                 ForwardTime();
+                Update(inputUsername);
             }
 
             else if (wantToBuy == "sell")
@@ -199,6 +201,7 @@ namespace Database_Projekt
                 SellStocks();
                 SellFromPortfolio();
                 ForwardTime();
+                Update(inputUsername);
             }
             else
             {
@@ -366,5 +369,25 @@ namespace Database_Projekt
             Console.WriteLine("Stocks have been updated");
             Console.ReadLine();
         }
+        private void DropTables()
+        {
+            try
+            {
+                NpgsqlCommand cmdDropTables = dataSource.CreateCommand(@"
+            DROP TABLE has;
+            DROP TABLE contains;
+            DROP TABLE stocks;
+            DROP TABLE abilities;
+            DROP TABLE player;
+            DROP TABLE portfolio;
+            ");
+                cmdDropTables.ExecuteNonQuery();
+            }
+
+            catch (Exception)
+            {
+            }
+        }
+
     }
 }
