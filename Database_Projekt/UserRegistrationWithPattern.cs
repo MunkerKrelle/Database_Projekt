@@ -288,7 +288,7 @@ namespace Database_Projekt
                     cmdBuyStocks = dataSource.CreateCommand($@"
             UPDATE player
             SET capital =  capital - {amountCost}
-            WHERE name = '{inputUsername}'
+            WHERE char_name = '{inputUsername}'
             ");
                     cmdBuyStocks.ExecuteNonQuery();
 
