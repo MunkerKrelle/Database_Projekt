@@ -261,18 +261,23 @@ namespace Database_Projekt
         {
             Console.WriteLine("Which company would you like to purchase stocks from?");
 
-            Console.WriteLine("Name: Mærsk, Price: 1000, Amount: 100\n" +
-                "Name: Novo Nordisk, Price: 500, Amount: 100\n" +
-                "Name: PostNord, Price: 50, Amount: 300");
+            NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT name, price, amount FROM stocks");
+            NpgsqlDataReader reader = cmd.ExecuteReader();
+
+            Console.WriteLine("Which company would you like to purchase stocks from?");
+            while (reader.Read())
+            {
+                Console.WriteLine($"Name: {reader.GetValue(0)}, Price: {reader.GetValue(1)}, Amount: {reader.GetValue(2)}");
+            }
             stockChosen = Console.ReadLine();
 
             Console.WriteLine("How many stocks would you like to buy?");
             amountToBuy = int.Parse(Console.ReadLine());
 
-            NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT * FROM public.player\r\n" +
-                $"INNER JOIN stocks ON stocks.stock_id = stock_id\r\n" +
-                $"Where (char_name = '{inputUsername}' AND name = '{stockChosen}')");
-            NpgsqlDataReader reader = cmd.ExecuteReader();
+            cmd = dataSource.CreateCommand($"SELECT * FROM public.player\r\n" +
+               $"INNER JOIN stocks ON stocks.stock_id = stock_id\r\n" +
+               $"Where (char_name = '{inputUsername}' AND name = '{stockChosen}')");
+            reader = cmd.ExecuteReader();
 
             while (reader.Read())
             {
@@ -308,20 +313,41 @@ namespace Database_Projekt
         private void BuyToPortfolio()
         {
             //IF ROW DOES NOT EXIST
-            NpgsqlCommand cmdInsertIntoPortfolioAfterBuy = dataSource.CreateCommand($@"
-            INSERT INTO portfolio (stock_name, amount, price_purchased_at) 
+            NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT player_name FROM portfolio WHERE (player_name = '{inputUsername}')");
+            NpgsqlDataReader reader = cmd.ExecuteReader();
+
+            bool portfolioBool = reader.Read();
+
+
+            if (portfolioBool == false)
+            {
+                NpgsqlCommand cmdInsertIntoPortfolioAfterBuy = dataSource.CreateCommand($@"
+            INSERT INTO portfolio (player_name, stock_name, amount, price_purchased_at, total_value) 
             
-            VALUES('{stockChosen}', '{amountToBuy}', '{amountCost}')
+            VALUES('{inputUsername}','{stockChosen}', '{amountToBuy}', '{amountCost}', '{amountCost}')
             ");
 
-            cmdInsertIntoPortfolioAfterBuy.ExecuteNonQuery();
-
-            //IF ROW ALREADY EXISTS
-            NpgsqlCommand cmdUpdatePortfolioAfterBuy = dataSource.CreateCommand($@"
+                cmdInsertIntoPortfolioAfterBuy.ExecuteNonQuery();
+            }
+            else
+            {
+                //IF ROW ALREADY EXISTS
+                NpgsqlCommand cmdUpdatePortfolioAfterBuy = dataSource.CreateCommand($@"
             UPDATE portfolio
             SET amount = amount + {amountToBuy}
+            SET total_value + {amountCost}
             WHERE name = '{stockChosen}'
             ");
+            }
+
+            cmd = dataSource.CreateCommand($"SELECT * FROM portfolio WHERE (player_name = '{inputUsername}')");
+            reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                Console.WriteLine($"Stock Name: {reader.GetValue(2)} Amount: {reader.GetValue(3)} Total Value: {reader.GetValue(5)}");
+            }
+            reader.Close();
         }
 
         private void SellFromPortfolio()
