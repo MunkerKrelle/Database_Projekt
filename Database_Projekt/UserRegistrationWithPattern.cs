@@ -9,10 +9,10 @@ namespace Database_Projekt
     {
         private readonly IRepository repository;
         NpgsqlDataSource dataSource;
-        string connectionString = "Host=localhost;Username=postgres;Password=Saunire.124;Database=myDatabase";
+        string connectionString = "Host=localhost;Username=postgres;Password=100899;Database=postgres";
         int amountToBuy;
         int amountToSell;
-        int amountAvaliable;
+        int amountCost;
         int day = 1;
         private int randomInt = 10;
         string wantToBuy;
@@ -58,8 +58,9 @@ namespace Database_Projekt
             {
                 repository.InsertUser(new User
                 {
-                    username = inputUsername
-                });
+                    username = inputUsername,
+                    capital = 1000
+                }); 
 
                 NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT char_name, capital FROM player WHERE (char_name = '{inputUsername}')");
                 NpgsqlDataReader reader = cmd.ExecuteReader();
@@ -267,13 +268,15 @@ namespace Database_Projekt
             Console.WriteLine("How many stocks would you like to buy?");
             amountToBuy = int.Parse(Console.ReadLine());
 
-            NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT char_name, capital FROM player WHERE (char_name = '{inputUsername}')");
+            NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT * FROM public.player\r\n" +
+                $"INNER JOIN stocks ON stocks.stock_id = stock_id\r\n" +
+                $"Where (char_name = '{inputUsername}' AND name = '{stockChosen}')");
             NpgsqlDataReader reader = cmd.ExecuteReader();
 
             while (reader.Read())
             {
-                int bucks = reader.GetInt16(1);
-                if (amountToBuy <= amountAvaliable && bucks >= 50)
+                amountCost
+                if (amountToBuy <= (int)reader.GetValue(5) && (int)reader.GetValue(1) >= (int)reader.GetValue(4) * amountToBuy)
                 {
                     NpgsqlCommand cmdBuyStocks = dataSource.CreateCommand($@"
             UPDATE stocks
@@ -281,8 +284,16 @@ namespace Database_Projekt
             WHERE name = '{stockChosen}'
             ");
                     cmdBuyStocks.ExecuteNonQuery();
+
+                    cmdBuyStocks = dataSource.CreateCommand($@"
+            UPDATE player
+            SET capital =  capital - {amountToBuy}
+            WHERE name = '{inputUsername}'
+            ");
+                    cmdBuyStocks.ExecuteNonQuery();
+
                 }
-                else if (amountToBuy > amountAvaliable)
+                else
                 {
                     Console.WriteLine("Sorry, that many stocks aren't avaliable right now");
                 }
@@ -322,7 +333,7 @@ namespace Database_Projekt
             WHERE name = '{stockChosen}'
             ");
 
-            //if (amountToSell >= amountAvaliable)
+            //if (amountToSell >= amountCost)
             //{
             //    NpgsqlCommand cmdDeleteFromTable = dataSource.CreateCommand($@"
             //    DELETE FROM portfolio
