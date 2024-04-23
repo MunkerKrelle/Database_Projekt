@@ -94,9 +94,6 @@ namespace Database_Projekt
             }
         }
 
-
-
-
         private void CreateTables()
         {
             NpgsqlCommand cmdCreateStocksTable = dataSource.CreateCommand(@"
@@ -302,8 +299,6 @@ namespace Database_Projekt
                 day++;
 
             }
-
-
         }
 
         private void MyRandom()
@@ -311,6 +306,7 @@ namespace Database_Projekt
             var rand = new Random();
             randomInt = rand.Next(-50, 51);
         }
+
         private void UpdateStocks()
         {
             MyRandom();
