@@ -10,7 +10,7 @@ namespace Database_Projekt
     {
         private readonly IRepository repository;
         NpgsqlDataSource dataSource;
-        string connectionString = "Host=localhost;Username=postgres;Password=Saunire.124;Database=postgres";
+        string connectionString = "Host=localhost;Username=postgres;Password=100899;Database=postgres";
         int amountToBuy;
         int amountToSell;
         int amountCost;
@@ -71,7 +71,7 @@ namespace Database_Projekt
 
                 while (reader.Read())
                 {
-                    Console.WriteLine($"Yo {inputUsername}, welcome to BIG BUCKS!\nYou have {reader.GetInt16(1)} bucks");
+                    Console.WriteLine($"\nYo {inputUsername}, welcome to BIG BUCKS!");
                 }
                 reader.Close();
             }
@@ -163,9 +163,7 @@ namespace Database_Projekt
             cmdCreateContainsTable.ExecuteNonQuery();
             cmdCreateHasTable.ExecuteNonQuery();
 
-
             Console.WriteLine("Tables created");
-
         }
 
         private void Insert()
@@ -196,6 +194,15 @@ namespace Database_Projekt
 
             Console.WriteLine("Do you want to buy or sell stocks?\nType BUY to buy or SELL to sell\n\nAlternatively, type CONTINUE to move forward to the next day and update prices");
 
+            NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT char_name, capital FROM player WHERE (char_name = '{inputUsername}')");
+            NpgsqlDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                Console.WriteLine($"You have {reader.GetInt16(1)} bucks");
+            }
+            reader.Close();
+
             wantToBuy = Console.ReadLine().ToLower();
 
             if (wantToBuy.ToLower() == "buy")
@@ -213,6 +220,7 @@ namespace Database_Projekt
             else if(wantToBuy.ToLower() == "continue")
             {
                 ForwardTime();
+                Update(inputUsername);
             }
             else
             {
@@ -308,6 +316,10 @@ namespace Database_Projekt
                     cmdBuyStocks.ExecuteNonQuery();
                     Console.WriteLine("Stocks bought");
                     BuyToPortfolio();
+
+                    Console.WriteLine("Press ENTER for next day");
+                    Console.ReadLine();
+                    Console.Clear() ;
                 }
                 else
                 {
