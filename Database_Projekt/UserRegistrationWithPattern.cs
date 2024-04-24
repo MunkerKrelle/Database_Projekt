@@ -9,7 +9,7 @@ namespace Database_Projekt
     {
         private readonly IRepository repository;
         NpgsqlDataSource dataSource;
-        string connectionString = "Host=localhost;Username=postgres;Password=Saunire.124;Database=postgres";
+        string connectionString = "Host=localhost;Username=postgres;Password=100899;Database=postgres";
         int amountToBuy;
         int amountToSell;
         int amountCost;
@@ -191,7 +191,6 @@ namespace Database_Projekt
             if (wantToBuy == "buy")
             {
                 BuyStocks();
-                BuyToPortfolio();
                 ForwardTime();
                 Update(inputUsername);
             }
@@ -208,8 +207,6 @@ namespace Database_Projekt
                 Update(inputUsername);
             }
         }
-
-
 
         private void ForwardTime()
         {
@@ -297,107 +294,104 @@ namespace Database_Projekt
             WHERE char_name = '{inputUsername}'
             ");
                     cmdBuyStocks.ExecuteNonQuery();
-
+                    Console.WriteLine("Stocks bought");
+                    BuyToPortfolio();
                 }
                 else
                 {
                     Console.WriteLine("Sorry, that many stocks aren't avaliable right now");
                 }
-
-                Console.WriteLine("Stocks bought");
-                Console.ReadLine();
             }
+            reader.Close();
         }
 
 
         private void BuyToPortfolio()
         {
             //IF ROW DOES NOT EXIST
-            //NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT player_name FROM portfolio WHERE (player_name = '{inputUsername}')");
-            //NpgsqlDataReader reader = cmd.ExecuteReader();
+            NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT name FROM portfolio WHERE (name = '{stockChosen}')");
+            NpgsqlDataReader reader = cmd.ExecuteReader();
 
-            //bool portfolioBool = reader.Read();
-
-            NpgsqlCommand cmdInsertIntoPortfolioAfterBuy = dataSource.CreateCommand($@"
+            bool portfolioBool = reader.Read();
+                if (portfolioBool == false)
+                {
+                    NpgsqlCommand cmdInsertIntoPortfolioAfterBuy = dataSource.CreateCommand($@"
             INSERT INTO portfolio (name, amount, price_purchased_at, total_value) 
             
             VALUES('{stockChosen}', '{amountToBuy}', '{amountCost}', '{amountCost}')
             ");
 
-            cmdInsertIntoPortfolioAfterBuy.ExecuteNonQuery();
+                    cmdInsertIntoPortfolioAfterBuy.ExecuteNonQuery();
+                }
+                else
+                {
+                    //IF ROW ALREADY EXISTS
+                    NpgsqlCommand cmdUpdatePortfolioAfterBuy = dataSource.CreateCommand($@"
+                UPDATE portfolio
+                SET amount = amount + {amountToBuy}
+                SET total_value + {amountCost}
+                WHERE (name = '{stockChosen}')
+                ");
+                }
 
-            //if (portfolioBool == false)
-            //{
-            //}
-        //    else
-        //    {
-        //        //IF ROW ALREADY EXISTS
-        //        NpgsqlCommand cmdUpdatePortfolioAfterBuy = dataSource.CreateCommand($@"
-        //    UPDATE portfolio
-        //    SET amount = amount + {amountToBuy}
-        //    SET total_value + {amountCost}
-        //    WHERE (name = '{stockChosen}')
-        //    ");
-        //    }
+                cmd = dataSource.CreateCommand($"SELECT * FROM portfolio");
+                reader = cmd.ExecuteReader();
 
-        //    cmd = dataSource.CreateCommand($"SELECT * FROM portfolio WHERE (name = '{stockChosen}')");
-        //    reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    Console.WriteLine($"Stock Name: {reader.GetValue(1)} Amount: {reader.GetValue(2)} Total Value: {reader.GetValue(4)}");
+                }
+                reader.Close();
+            }
 
-        //    while (reader.Read())
-        //    {
-        //        Console.WriteLine($"Stock Name: {reader.GetValue(2)} Amount: {reader.GetValue(3)} Total Value: {reader.GetValue(5)}");
-        //    }
-        //    reader.Close();
-        }
+            private void SellFromPortfolio()
+            {
+                //INDSÆT EGENTLIG VÆRDI PÅ PRICE_PURCHASED_AT
 
-        private void SellFromPortfolio()
-        {
-            //INDSÆT EGENTLIG VÆRDI PÅ PRICE_PURCHASED_AT
-
-            NpgsqlCommand cmdUpdatePortfolioAfterSale = dataSource.CreateCommand($@"
+                NpgsqlCommand cmdUpdatePortfolioAfterSale = dataSource.CreateCommand($@"
             UPDATE portfolio
             SET amount = amount - {amountToSell}
             WHERE name = '{stockChosen}'
             ");
 
-            //if (amountToSell >= amountCost)
-            //{
-            //    NpgsqlCommand cmdDeleteFromTable = dataSource.CreateCommand($@"
-            //    DELETE FROM portfolio
-            //    WHERE name = '{stockChosen}'
-            //    ");
+                //if (amountToSell >= amountCost)
+                //{
+                //    NpgsqlCommand cmdDeleteFromTable = dataSource.CreateCommand($@"
+                //    DELETE FROM portfolio
+                //    WHERE name = '{stockChosen}'
+                //    ");
 
-            //    cmdDeleteFromTable.ExecuteNonQuery();
-            //}
+                //    cmdDeleteFromTable.ExecuteNonQuery();
+                //}
 
-            cmdUpdatePortfolioAfterSale.ExecuteNonQuery();
-        }
+                cmdUpdatePortfolioAfterSale.ExecuteNonQuery();
+            }
 
-        private void MyRandom()
-        {
-            var rand = new Random();
-            randomInt = rand.Next(-50, 51);
-        }
-        private void UpdateStocks()
-        {
-            MyRandom();
+            private void MyRandom()
+            {
+                var rand = new Random();
+                randomInt = rand.Next(-50, 51);
+            }
+            private void UpdateStocks()
+            {
+                MyRandom();
 
-            NpgsqlCommand cmdUpdateStocksTable = dataSource.CreateCommand($@"
+                NpgsqlCommand cmdUpdateStocksTable = dataSource.CreateCommand($@"
         UPDATE stocks 
         SET price = price + {randomInt}
 
         ");
 
-            cmdUpdateStocksTable.ExecuteNonQuery();
-            //Console.WriteLine($"{bob}" );
-            Console.WriteLine("Stocks have been updated");
-            Console.ReadLine();
-        }
-        private void DropTables()
-        {
-            try
+                cmdUpdateStocksTable.ExecuteNonQuery();
+                //Console.WriteLine($"{bob}" );
+                Console.WriteLine("Stocks have been updated");
+                Console.ReadLine();
+            }
+            private void DropTables()
             {
-                NpgsqlCommand cmdDropTables = dataSource.CreateCommand(@"
+                try
+                {
+                    NpgsqlCommand cmdDropTables = dataSource.CreateCommand(@"
             DROP TABLE has;
             DROP TABLE contains;
             DROP TABLE abilities;
@@ -405,15 +399,15 @@ namespace Database_Projekt
             DROP TABLE player;
             DROP TABLE stocks;
             ");
-                cmdDropTables.ExecuteNonQuery();
+                    cmdDropTables.ExecuteNonQuery();
 
-                Console.WriteLine("Tables dropped");
+                    Console.WriteLine("Tables dropped");
+                }
+
+                catch (Exception)
+                {
+                }
             }
 
-            catch (Exception)
-            {
-            }
         }
-
     }
-}
