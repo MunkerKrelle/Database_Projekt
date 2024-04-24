@@ -9,7 +9,7 @@ namespace Database_Projekt
     {
         private readonly IRepository repository;
         NpgsqlDataSource dataSource;
-        string connectionString = "Host=localhost;Username=postgres;Password=100899;Database=postgres";
+        string connectionString = "Host=localhost;Username=postgres;Password=sargon;Database=ovelse2";
         int amountToBuy;
         int amountToSell;
         int amountCost;
@@ -134,7 +134,7 @@ namespace Database_Projekt
                 );");
             NpgsqlCommand cmdCreateContainsTable = dataSource.CreateCommand(@"
                 CREATE TABLE IF NOT EXISTS contains (
-                    stock_id INT REFERENCES stocks(stock_id),
+                    
                     port_id INT REFERENCES portfolio(port_id),
                     price_purchased_at INT NOT NULL,
                     purchase_date INT NOT NULL
