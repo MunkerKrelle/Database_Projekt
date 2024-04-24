@@ -10,7 +10,7 @@ namespace Database_Projekt
     {
         private readonly IRepository repository;
         NpgsqlDataSource dataSource;
-        string connectionString = "Host=localhost;Username=postgres;Password=100899;Database=postgres";
+        string connectionString = "Host=localhost;Username=postgres;Password=Saunire.124;Database=postgres";
         int amountToBuy;
         int amountToSell;
         int amountCost;
@@ -194,23 +194,25 @@ namespace Database_Projekt
         {
             Console.WriteLine($"Day: {day}");
 
-            Console.WriteLine("Do you want to buy or sell stocks?\nType BUY to buy or SELL to sell");
+            Console.WriteLine("Do you want to buy or sell stocks?\nType BUY to buy or SELL to sell\n\nAlternatively, type CONTINUE to move forward to the next day and update prices");
 
             wantToBuy = Console.ReadLine().ToLower();
 
-            if (wantToBuy == "buy")
+            if (wantToBuy.ToLower() == "buy")
             {
                 BuyStocks();
-                ForwardTime();
                 Update(inputUsername);
             }
 
-            else if (wantToBuy == "sell")
+            else if (wantToBuy.ToLower() == "sell")
             {
                 SellStocks();
                 SellFromPortfolio();
-                ForwardTime();
                 Update(inputUsername);
+            }
+            else if(wantToBuy.ToLower() == "continue")
+            {
+                ForwardTime();
             }
             else
             {
