@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.ConstrainedExecution;
 
 namespace Database_Projekt
 {
@@ -34,18 +35,21 @@ namespace Database_Projekt
 
             Console.WriteLine("WELCOME TO BIG BUCKS:\n" +
                 "1) Create a new game, 2) Load an existing one");
-            string userInput = Console.ReadLine();
-            switch (userInput)
+            while (true)
             {
-                case "1":
-                    Update(CreateNewPlayer());
-                    break;
-                case "2":
-                    LoadExistingPlayer();
-                    break;
-                default:
-                    Console.WriteLine("Invalid input");
-                    break;
+                string userInput = Console.ReadLine();
+                switch (userInput)
+                {
+                    case "1":
+                        Update(CreateNewPlayer());
+                        return;
+                    case "2":
+                        LoadExistingPlayer();
+                        return;
+                    default:
+                        Console.WriteLine("Invalid input, try again");
+                        break;
+                }
             }
 
         }
@@ -81,18 +85,24 @@ namespace Database_Projekt
         private void LoadExistingPlayer()
         {
             Console.WriteLine("Specify your username:");
-            string inputUsername = Console.ReadLine();
+            while (true)
+            {
+                string inputUsername = Console.ReadLine();
 
-            User foundUser = repository.GetUser(inputUsername);
-            if (foundUser == null)
-            {
-                Console.WriteLine("Invalid credentials");
-                return;
-            }
-            else
-            {
-                Console.WriteLine($"Yo {inputUsername}, welcome back to BIG BUCKS");
-                Update(inputUsername);
+                NpgsqlCommand cmd = dataSource.CreateCommand($"SELECT char_name, capital FROM player WHERE (char_name = '{inputUsername}')");
+                NpgsqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read() == false)
+                {
+                    Console.WriteLine("Invalid credentials, try again");
+                }
+                else
+                {
+                    User foundUser = repository.GetUser(inputUsername);
+                    Console.WriteLine($"Yo {inputUsername}, welcome back to BIG BUCKS. You have {reader.GetValue(1)} bucks.");
+                    Update(inputUsername);
+                    break;
+                }
             }
         }
 
@@ -209,8 +219,6 @@ namespace Database_Projekt
                 Update(inputUsername);
             }
         }
-
-
 
         private void ForwardTime()
         {
