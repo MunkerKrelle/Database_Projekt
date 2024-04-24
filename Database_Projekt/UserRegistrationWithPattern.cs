@@ -9,7 +9,7 @@ namespace Database_Projekt
     {
         private readonly IRepository repository;
         NpgsqlDataSource dataSource;
-        string connectionString = "Host=localhost;Username=postgres;Password=sargon;Database=ovelse2";
+        string connectionString = "Host=localhost;Username=postgres;Password=100899;Database=postgres";
         int amountToBuy;
         int amountToSell;
         int amountCost;
@@ -339,7 +339,7 @@ namespace Database_Projekt
             UPDATE portfolio
             SET amount = amount + {amountToBuy}
             SET total_value + {amountCost}
-            WHERE name = '{stockChosen}'
+            WHERE (stock_name = '{stockChosen}' AND player_name = '{inputUsername}')
             ");
             }
 
