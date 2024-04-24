@@ -10,7 +10,7 @@ namespace Database_Projekt
     {
         private readonly IRepository repository;
         NpgsqlDataSource dataSource;
-        string connectionString = "Host=localhost;Username=postgres;Password=100899;Database=postgres";
+        string connectionString = "Host=localhost;Username=postgres;Password=sargon;Database=ovelse2";
         int amountToBuy;
         int amountToSell;
         int amountCost;
